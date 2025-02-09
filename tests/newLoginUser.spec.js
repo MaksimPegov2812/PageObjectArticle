@@ -1,11 +1,9 @@
 
 import { test, expect } from '@playwright/test';
 import { faker } from '@faker-js/faker';
-import { MainPage } from '../src/pages/mainPage';
-import { RegisterPage } from '../src/pages/registerPage';
-import { YourfeedPage } from '../src/pages/yourfeedPage';
-import { ProfileSettingsPage } from '../src/pages/profileSettingsPage';
-import { LoginPage } from '../src/pages/loginPage';
+import { MainPage, RegisterPage, YourfeedPage, ProfileSettingsPage, LoginPage } from '../src/pages/index';
+import { UserBuilder } from '../src/helpers/builder/index';
+
 
 const URL_UI = 'https://realworld.qa.guru/';
 
@@ -18,12 +16,7 @@ test.describe('Проверка изменения пароля пользова
         const yourfeedPage = new YourfeedPage(page);
         const profileSettingsPage = new ProfileSettingsPage(page);
         const loginPage = new LoginPage(page);
-        //данные пользователя
-        const user = {
-            email: faker.internet.email(),
-            password: faker.internet.password(),
-            username: faker.person.firstName()
-        };
+        const userBuilder = new UserBuilder().addEmail().addPassword().addUsername().generate();
         //данные нового пароля пользователя
         const newpassword = {
             password: faker.internet.password()            
@@ -32,7 +25,7 @@ test.describe('Проверка изменения пароля пользова
         //действие на Главной странице     
         await mainPage.open(URL_UI); //открытие страницы
         await mainPage.gotoRegister(); //клик на кнопку регистрации
-        await registerPage.register(user.username, user.email, user.password);//регистрация пользователя
+        await registerPage.register(userBuilder.username, userBuilder.email, userBuilder.password);//регистрация пользователя
 
         //действие на странице YourfeedPage пользователя клик на кнопку с именем пользователя, где нажимаем на Settings
         await yourfeedPage.gotoProfile();
@@ -53,11 +46,13 @@ test.describe('Проверка изменения пароля пользова
         await mainPage.gotoLogin();
         
         //Введение старой почты и нового пароля
-        await loginPage.gologin(user.email, newpassword.password);
+        await loginPage.gologin(userBuilder.email, newpassword.password);
 
         //Ожидаемй результат совпадения имени пользователя
-        await expect(yourfeedPage.profileNameField).toContainText(user.username);
+        await expect(yourfeedPage.profileNameField).toContainText(userBuilder.username);
     });
     
 })
+
+//36.25
 

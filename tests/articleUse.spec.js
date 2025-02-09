@@ -1,11 +1,8 @@
 
 import { test, expect } from '@playwright/test';
 import { faker } from '@faker-js/faker';
-import { MainPage } from '../src/pages/mainPage';
-import { RegisterPage } from '../src/pages/registerPage';
-import { YourfeedPage } from '../src/pages/yourfeedPage';
-import { AddArticlePage } from '../src/pages/addarticlePage';
-import { ArticlePage } from '../src/pages/articlePage';
+import { MainPage, RegisterPage, YourfeedPage, AddArticlePage, ArticlePage } from '../src/pages/index';
+
 
 const URL_UI = 'https://realworld.qa.guru/';
 
