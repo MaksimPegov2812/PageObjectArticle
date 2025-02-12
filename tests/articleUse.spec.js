@@ -2,6 +2,7 @@
 import { test, expect } from '@playwright/test';
 import { faker } from '@faker-js/faker';
 import { MainPage, RegisterPage, YourfeedPage, AddArticlePage, ArticlePage } from '../src/pages/index';
+import { ArticleBuilder } from '../src/helpers/builder/index';
 
 
 const URL_UI = 'https://realworld.qa.guru/';
@@ -26,43 +27,37 @@ test.describe('Авторизация пользователя', () => {
     test('Создание новой публикации', async ({ page }) => {
         //Объявление констант
         const yourFeedPage = new YourfeedPage(page);
-        const addArticlePage = new AddArticlePage(page);        
-        const newarticle = {
-            title: faker.lorem.sentence(3),            
-            articleabout: faker.lorem.sentence({ min: 3, max: 5 }),
-            content: faker.lorem.text(),
-            tags: faker.lorem.text(1)
-        };
+        const addArticlePage = new AddArticlePage(page); 
+        const articleBuilder = new ArticleBuilder().addTitle().addArticleAbout().addContent().addTags().generateArticle();
         const articlePage = new ArticlePage(page);        
 
-        //Создание новой публикации
-        await yourFeedPage.gotoArticle(); //переход на страницу создания публикации https://realworld.qa.guru/#/editor
-        await addArticlePage.tocreateArticle(newarticle.title, newarticle.articleabout, newarticle.content, newarticle.tags); //создание новой публикации и переход на страницу созданной публикации
-        //сравнение заголовков публикации при ее создании и на странице новой публикации
-        await expect(page.locator('.container').nth(1)).toContainText(newarticle.title);
+        //переход на страницу создания публикации https://realworld.qa.guru/#/editor
+        await yourFeedPage.gotoArticle();
+        
+        //создание новой публикации и переход на страницу созданной публикации
+        await addArticlePage.tocreateArticle(articleBuilder.title, articleBuilder.articleAbout, articleBuilder.content, articleBuilder.tags);
+        
+        //сравнение заголовков публикации при ее создании и на странице новой публикации        
+        await expect(articlePage.newArticleTitle).toContainText(articleBuilder.title);
     });
 
     test('Создание комментария к публикации', async ({ page }) => {
         //Объявление констант
         const yourFeedPage = new YourfeedPage(page);
         const addArticlePage = new AddArticlePage(page);
-        const articlePage = new ArticlePage(page);        
-        const newarticle = {
-            title: faker.lorem.sentence(3),            
-            articleabout: faker.lorem.sentence({ min: 3, max: 5 }),
-            content: faker.lorem.text(),
-            tags: faker.lorem.text(1)
-        };        
+        const articlePage = new ArticlePage(page);
+        const articleBuilder = new ArticleBuilder().addTitle().addArticleAbout().addContent().addTags().generateArticle();        
         const commentarticle = {
             comment: faker.lorem.text(),
         };
 
-        //Создание новой публикации
+        //переход на страницу создания публикации https://realworld.qa.guru/#/editor
         await yourFeedPage.gotoArticle();
-        await addArticlePage.tocreateArticle(newarticle.title, newarticle.articleabout, newarticle.content, newarticle.tags);    
+        //создание новой публикации и переход на страницу созданной публикации
+        await addArticlePage.tocreateArticle(articleBuilder.title, articleBuilder.articleAbout, articleBuilder.content, articleBuilder.tags);    
         //Написание комментария к созданное публикации        
         await articlePage.topostCommentArticle(commentarticle.comment);
-        //Ссравнение текста написанного и опубликованного комментария к созданной публикации    
-        await expect(page.locator('div > .card-block')).toContainText(commentarticle.comment);
+        //Ссравнение текста написанного и опубликованного комментария к созданной публикации        
+        await expect(addArticlePage.newCommentField).toContainText(commentarticle.comment);
       });
 })
